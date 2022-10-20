@@ -7,9 +7,10 @@ import csv
 import pandas as pd
 from colorama import Fore
 
-api_id = 27434827
-api_hash = '406b124a883756da21f75b7ee62d9227'
-phone = '+79817097969'
+# Paste API credentials here
+api_id = 2362365435
+api_hash = '406b124a883756fefsg24g24g'
+phone = '+76668887777'
 
 
 class bcolors:
