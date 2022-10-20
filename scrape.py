@@ -1,11 +1,30 @@
+import sys
+import os
 from telethon.sync import TelegramClient
 from telethon.tl.functions.messages import GetDialogsRequest
 from telethon.tl.types import InputPeerEmpty
 import csv
+import pandas as pd
+from colorama import Fore
 
 api_id = 27434827
 api_hash = '406b124a883756da21f75b7ee62d9227'
 phone = '+79817097969'
+
+
+class bcolors:
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
+
+
+def banner():
+    if sys.platform.lower() == "win32":
+        os.system('color')
+
+    return print(f'''================
+{bcolors.RED}TELEGRAM SCRAPER{bcolors.ENDC}
+================''')
 
 
 def connect_client():
@@ -47,7 +66,7 @@ def list_groups():
 
 
 def target_group(groups):
-    print('Choose a group to scrape members from:')
+    print(f'{bcolors.YELLOW}Choose a group to scrape members from:{bcolors.ENDC}')
     i = 0
     for g in groups:
         print(str(i) + '- ' + g.title)
@@ -99,12 +118,53 @@ def data_to_csv(all_participants, target_group):
 def data_to_xlsx(all_participants, target_group):
     print('Saving In file...')
 
+    username_list = []
+    name_list = []
+    id_list = []
+    hash_list = []
+    group_list = []
+    group_id_list = []
+
+    count = 1
+    for user in all_participants:
+        if user.username:
+            username = user.username
+        else:
+            username = ""
+        if user.first_name:
+            first_name = user.first_name
+        else:
+            first_name = ""
+        if user.last_name:
+            last_name = user.last_name
+        else:
+            last_name = ""
+        name = (first_name + ' ' + last_name).strip()
+        username_list.append(username)
+        name_list.append(name)
+        id_list.append(user.id)
+        hash_list.append(user.access_hash)
+        group_list.append(target_group.title)
+        group_id_list.append(target_group.id)
+
+        print(str(count) + ' users scraped')
+        count += 1
+
+    df = pd.DataFrame({'username': username_list, 'name': name_list, 'user id': id_list,
+                       'hash': hash_list, 'group': group_list, 'group id': group_id_list})
+    df.to_excel(f'members.xlsx', encoding='utf-8',
+                index=False, header=True)
+
+    return print(f'{bcolors.YELLOW}All done!{bcolors.ENDC}')
+
 
 if __name__ == "__main__":
+    banner()
 
     client = TelegramClient(phone, api_id, api_hash)
 
     connect_client()
     group = target_group(list_groups())
     all_participants = get_members(group)
-    data_to_csv(all_participants, group)
+    data_to_xlsx(all_participants, group)
+    # data_to_csv(all_participants, group)
